@@ -94,12 +94,21 @@ export default function Dashboard({ dailyLog, profile, onUpdateWater }: Dashboar
       {/* Hero Header */}
       <div className="hero-gradient hero-shimmer rounded-3xl p-6 text-white shadow-lg shadow-violet-200">
         <p className="text-xs font-medium opacity-70 tracking-wide uppercase">{dayName} · {dateStr}</p>
-        <h1 className="text-2xl font-black mt-1">{greeting}, {profile.name}! ✨</h1>
-        <p className="text-sm opacity-85 mt-1.5 leading-relaxed">
-          {dailyLog.foods.length === 0
-            ? "Ready to start your healthy day? Log your first meal!"
-            : calorieStatus.message}
-        </p>
+        <div className="flex items-center gap-4 mt-2">
+          <img
+            src={import.meta.env.BASE_URL + 'tanwi-avatar.jpg'}
+            alt="Tanwi"
+            className="w-14 h-14 rounded-2xl object-cover border-2 border-white/40 shadow-lg"
+          />
+          <div>
+            <h1 className="text-2xl font-black">{greeting}, {profile.name}! ✨</h1>
+            <p className="text-sm opacity-85 mt-0.5 leading-relaxed">
+              {dailyLog.foods.length === 0
+                ? "Ready to start your healthy day? Log your first meal!"
+                : calorieStatus.message}
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Calorie Ring Card */}
