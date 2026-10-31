@@ -1,16 +1,20 @@
 import { useState, useCallback } from 'react';
-import { LayoutDashboard, Sparkles, Calendar, TrendingUp, List } from 'lucide-react';
+import { LayoutDashboard, Sparkles, Calendar, TrendingUp, List, Moon, Bell } from 'lucide-react';
 import Dashboard from './components/Dashboard';
 import QuickLog from './components/QuickLog';
 import FoodLogger from './components/FoodLogger';
 import ExerciseTracker from './components/ExerciseTracker';
 import Schedule from './components/Schedule';
 import Progress from './components/Progress';
+import SleepTracker from './components/SleepTracker';
+import Reminders, { DEFAULT_REMINDERS } from './components/Reminders';
 import { useLocalStorage, getTodayKey } from './hooks/useLocalStorage';
 import { DEFAULT_PROFILE } from './utils/calculations';
 import type { DailyLog, LoggedFood, LoggedExercise, UserProfile, FoodItem, WeightEntry } from './types';
+import type { SleepEntry } from './components/SleepTracker';
+import type { Reminder } from './components/Reminders';
 
-type Tab = 'dashboard' | 'quicklog' | 'browse' | 'schedule' | 'progress';
+type Tab = 'dashboard' | 'quicklog' | 'browse' | 'schedule' | 'progress' | 'sleep' | 'reminders';
 
 const emptyDailyLog: DailyLog = {
   date: getTodayKey(),
@@ -25,6 +29,8 @@ export default function App() {
   const [dailyLogs, setDailyLogs] = useLocalStorage<Record<string, DailyLog>>('tanvi-daily-logs', {});
   const [weightEntries, setWeightEntries] = useLocalStorage<WeightEntry[]>('tanvi-weight-entries', []);
   const [customFoods, setCustomFoods] = useLocalStorage<FoodItem[]>('tanvi-custom-foods', []);
+  const [sleepEntries, setSleepEntries] = useLocalStorage<SleepEntry[]>('tanvi-sleep-entries', []);
+  const [reminders, setReminders] = useLocalStorage<Reminder[]>('tanvi-reminders', DEFAULT_REMINDERS);
   const [browseMode, setBrowseMode] = useState<'food' | 'exercise'>('food');
 
   const todayKey = getTodayKey();
@@ -75,17 +81,50 @@ export default function App() {
     setCustomFoods(prev => [...prev, food]);
   }, [setCustomFoods]);
 
-  const tabs: { id: Tab; icon: React.ReactNode; label: string }[] = [
+  const handleAddSleep = useCallback((entry: SleepEntry) => {
+    setSleepEntries(prev => {
+      const filtered = prev.filter(e => e.date !== entry.date);
+      return [...filtered, entry].sort((a, b) => a.date.localeCompare(b.date));
+    });
+  }, [setSleepEntries]);
+
+  // Top row: main 4 tabs. Secondary: accessible via icons on top or swipe
+  const mainTabs: { id: Tab; icon: React.ReactNode; label: string }[] = [
     { id: 'dashboard', icon: <LayoutDashboard size={20} />, label: 'Home' },
     { id: 'quicklog', icon: <Sparkles size={20} />, label: 'Log' },
-    { id: 'browse', icon: <List size={20} />, label: 'Browse' },
-    { id: 'schedule', icon: <Calendar size={20} />, label: 'Schedule' },
-    { id: 'progress', icon: <TrendingUp size={20} />, label: 'Progress' },
+    { id: 'sleep', icon: <Moon size={20} />, label: 'Sleep' },
+    { id: 'reminders', icon: <Bell size={20} />, label: 'Alerts' },
+  ];
+
+  const secondaryTabs: { id: Tab; icon: React.ReactNode; label: string }[] = [
+    { id: 'browse', icon: <List size={18} />, label: 'Browse' },
+    { id: 'schedule', icon: <Calendar size={18} />, label: 'Schedule' },
+    { id: 'progress', icon: <TrendingUp size={18} />, label: 'Progress' },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <main className="max-w-lg mx-auto px-4 pt-4">
+    <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #f8f0ff 0%, #f0f4ff 50%, #f0fdf4 100%)' }}>
+      {/* Secondary tabs bar (only shown when a secondary tab is active, or as quick access) */}
+      <div className="fixed top-0 left-0 right-0 z-10 bottom-nav">
+        <div className="max-w-lg mx-auto flex items-center px-2 py-1.5 gap-1">
+          {secondaryTabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
+                activeTab === tab.id
+                  ? 'bg-violet-100 text-violet-700'
+                  : 'text-gray-400 hover:text-gray-600'
+              }`}
+            >
+              {tab.icon}
+              <span>{tab.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <main className="max-w-lg mx-auto px-4 pt-12">
         {activeTab === 'dashboard' && (
           <Dashboard
             dailyLog={todayLog}
@@ -100,24 +139,37 @@ export default function App() {
             customFoods={customFoods}
           />
         )}
+        {activeTab === 'sleep' && (
+          <SleepTracker
+            sleepEntries={sleepEntries}
+            onAddSleep={handleAddSleep}
+            todayLog={todayLog}
+          />
+        )}
+        {activeTab === 'reminders' && (
+          <Reminders
+            reminders={reminders}
+            onUpdateReminders={setReminders}
+          />
+        )}
         {activeTab === 'browse' && (
           <div className="space-y-3 pb-24">
-            <div className="flex gap-2">
+            <div className="flex gap-2 p-1 bg-white/60 rounded-2xl backdrop-blur-sm">
               <button
                 onClick={() => setBrowseMode('food')}
-                className={`flex-1 py-2.5 rounded-xl text-sm font-medium ${
-                  browseMode === 'food' ? 'bg-emerald-500 text-white' : 'bg-white text-gray-600 shadow-sm'
+                className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${
+                  browseMode === 'food' ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-200' : 'text-gray-500'
                 }`}
               >
                 🍽️ Food Database
               </button>
               <button
                 onClick={() => setBrowseMode('exercise')}
-                className={`flex-1 py-2.5 rounded-xl text-sm font-medium ${
-                  browseMode === 'exercise' ? 'bg-orange-500 text-white' : 'bg-white text-gray-600 shadow-sm'
+                className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${
+                  browseMode === 'exercise' ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg shadow-orange-200' : 'text-gray-500'
                 }`}
               >
-                🏋️ Exercise Database
+                🏋️ Exercises
               </button>
             </div>
             {browseMode === 'food' ? (
@@ -143,9 +195,10 @@ export default function App() {
         )}
       </main>
 
+      {/* Bottom Navigation — Main 4 tabs */}
       <nav className="fixed bottom-0 left-0 right-0 bottom-nav safe-area-bottom">
         <div className="max-w-lg mx-auto flex">
-          {tabs.map(tab => (
+          {mainTabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
