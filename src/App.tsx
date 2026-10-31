@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
-import { LayoutDashboard, UtensilsCrossed, Dumbbell, Calendar, TrendingUp } from 'lucide-react';
+import { LayoutDashboard, Sparkles, Calendar, TrendingUp, List } from 'lucide-react';
 import Dashboard from './components/Dashboard';
+import QuickLog from './components/QuickLog';
 import FoodLogger from './components/FoodLogger';
 import ExerciseTracker from './components/ExerciseTracker';
 import Schedule from './components/Schedule';
@@ -9,7 +10,7 @@ import { useLocalStorage, getTodayKey } from './hooks/useLocalStorage';
 import { DEFAULT_PROFILE } from './utils/calculations';
 import type { DailyLog, LoggedFood, LoggedExercise, UserProfile, FoodItem, WeightEntry } from './types';
 
-type Tab = 'dashboard' | 'food' | 'exercise' | 'schedule' | 'progress';
+type Tab = 'dashboard' | 'quicklog' | 'browse' | 'schedule' | 'progress';
 
 const emptyDailyLog: DailyLog = {
   date: getTodayKey(),
@@ -24,6 +25,7 @@ export default function App() {
   const [dailyLogs, setDailyLogs] = useLocalStorage<Record<string, DailyLog>>('tanvi-daily-logs', {});
   const [weightEntries, setWeightEntries] = useLocalStorage<WeightEntry[]>('tanvi-weight-entries', []);
   const [customFoods, setCustomFoods] = useLocalStorage<FoodItem[]>('tanvi-custom-foods', []);
+  const [browseMode, setBrowseMode] = useState<'food' | 'exercise'>('food');
 
   const todayKey = getTodayKey();
   const todayLog = dailyLogs[todayKey] || { ...emptyDailyLog, date: todayKey };
@@ -39,8 +41,16 @@ export default function App() {
     updateTodayLog(log => ({ ...log, foods: [...log.foods, food] }));
   }, [updateTodayLog]);
 
+  const handleAddFoods = useCallback((foods: LoggedFood[]) => {
+    updateTodayLog(log => ({ ...log, foods: [...log.foods, ...foods] }));
+  }, [updateTodayLog]);
+
   const handleAddExercise = useCallback((exercise: LoggedExercise) => {
     updateTodayLog(log => ({ ...log, exercises: [...log.exercises, exercise] }));
+  }, [updateTodayLog]);
+
+  const handleAddExercises = useCallback((exercises: LoggedExercise[]) => {
+    updateTodayLog(log => ({ ...log, exercises: [...log.exercises, ...exercises] }));
   }, [updateTodayLog]);
 
   const handleUpdateWater = useCallback((delta: number) => {
@@ -67,15 +77,14 @@ export default function App() {
 
   const tabs: { id: Tab; icon: React.ReactNode; label: string }[] = [
     { id: 'dashboard', icon: <LayoutDashboard size={20} />, label: 'Home' },
-    { id: 'food', icon: <UtensilsCrossed size={20} />, label: 'Food' },
-    { id: 'exercise', icon: <Dumbbell size={20} />, label: 'Exercise' },
+    { id: 'quicklog', icon: <Sparkles size={20} />, label: 'Log' },
+    { id: 'browse', icon: <List size={20} />, label: 'Browse' },
     { id: 'schedule', icon: <Calendar size={20} />, label: 'Schedule' },
     { id: 'progress', icon: <TrendingUp size={20} />, label: 'Progress' },
   ];
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Main Content */}
       <main className="max-w-lg mx-auto px-4 pt-4">
         {activeTab === 'dashboard' && (
           <Dashboard
@@ -84,15 +93,43 @@ export default function App() {
             onUpdateWater={handleUpdateWater}
           />
         )}
-        {activeTab === 'food' && (
-          <FoodLogger
-            onAddFood={handleAddFood}
-            onAddCustomFood={handleAddCustomFood}
+        {activeTab === 'quicklog' && (
+          <QuickLog
+            onAddFoods={handleAddFoods}
+            onAddExercises={handleAddExercises}
             customFoods={customFoods}
           />
         )}
-        {activeTab === 'exercise' && (
-          <ExerciseTracker onAddExercise={handleAddExercise} />
+        {activeTab === 'browse' && (
+          <div className="space-y-3 pb-24">
+            <div className="flex gap-2">
+              <button
+                onClick={() => setBrowseMode('food')}
+                className={`flex-1 py-2.5 rounded-xl text-sm font-medium ${
+                  browseMode === 'food' ? 'bg-emerald-500 text-white' : 'bg-white text-gray-600 shadow-sm'
+                }`}
+              >
+                🍽️ Food Database
+              </button>
+              <button
+                onClick={() => setBrowseMode('exercise')}
+                className={`flex-1 py-2.5 rounded-xl text-sm font-medium ${
+                  browseMode === 'exercise' ? 'bg-orange-500 text-white' : 'bg-white text-gray-600 shadow-sm'
+                }`}
+              >
+                🏋️ Exercise Database
+              </button>
+            </div>
+            {browseMode === 'food' ? (
+              <FoodLogger
+                onAddFood={handleAddFood}
+                onAddCustomFood={handleAddCustomFood}
+                customFoods={customFoods}
+              />
+            ) : (
+              <ExerciseTracker onAddExercise={handleAddExercise} />
+            )}
+          </div>
         )}
         {activeTab === 'schedule' && <Schedule />}
         {activeTab === 'progress' && (
@@ -106,7 +143,6 @@ export default function App() {
         )}
       </main>
 
-      {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 safe-area-bottom">
         <div className="max-w-lg mx-auto flex">
           {tabs.map(tab => (
