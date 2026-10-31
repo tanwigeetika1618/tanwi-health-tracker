@@ -1,6 +1,6 @@
 {
   "name": "Tanwi Health Tracker",
-  "short_name": "Health",
+  "short_name": "Tanwi Tracker",
   "description": "Tanwi's personal health, nutrition & fitness tracker",
   "start_url": "/tanwi-health-tracker/",
   "display": "standalone",
