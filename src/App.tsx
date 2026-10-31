@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { LayoutDashboard, Sparkles, Calendar, TrendingUp, List, Moon, Bell } from 'lucide-react';
+import { LayoutDashboard, Sparkles, Calendar, TrendingUp, List, Moon, Bell, ChefHat } from 'lucide-react';
 import Dashboard from './components/Dashboard';
 import QuickLog from './components/QuickLog';
 import FoodLogger from './components/FoodLogger';
@@ -8,13 +8,14 @@ import Schedule from './components/Schedule';
 import Progress from './components/Progress';
 import SleepTracker from './components/SleepTracker';
 import Reminders, { DEFAULT_REMINDERS } from './components/Reminders';
+import MealPlan from './components/MealPlan';
 import { useLocalStorage, getTodayKey } from './hooks/useLocalStorage';
 import { DEFAULT_PROFILE } from './utils/calculations';
 import type { DailyLog, LoggedFood, LoggedExercise, UserProfile, FoodItem, WeightEntry } from './types';
 import type { SleepEntry } from './components/SleepTracker';
 import type { Reminder } from './components/Reminders';
 
-type Tab = 'dashboard' | 'quicklog' | 'browse' | 'schedule' | 'progress' | 'sleep' | 'reminders';
+type Tab = 'dashboard' | 'quicklog' | 'browse' | 'schedule' | 'progress' | 'sleep' | 'reminders' | 'mealplan';
 
 const emptyDailyLog: DailyLog = {
   date: getTodayKey(),
@@ -97,6 +98,7 @@ export default function App() {
   ];
 
   const secondaryTabs: { id: Tab; icon: React.ReactNode; label: string }[] = [
+    { id: 'mealplan', icon: <ChefHat size={18} />, label: 'Meals' },
     { id: 'browse', icon: <List size={18} />, label: 'Browse' },
     { id: 'schedule', icon: <Calendar size={18} />, label: 'Schedule' },
     { id: 'progress', icon: <TrendingUp size={18} />, label: 'Progress' },
@@ -152,6 +154,7 @@ export default function App() {
             onUpdateReminders={setReminders}
           />
         )}
+        {activeTab === 'mealplan' && <MealPlan />}
         {activeTab === 'browse' && (
           <div className="space-y-3 pb-24">
             <div className="flex gap-2 p-1 bg-white/60 rounded-2xl backdrop-blur-sm">
