@@ -143,20 +143,20 @@ export default function App() {
         )}
       </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 safe-area-bottom">
+      <nav className="fixed bottom-0 left-0 right-0 bottom-nav safe-area-bottom">
         <div className="max-w-lg mx-auto flex">
           {tabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 flex flex-col items-center py-2 pt-3 transition-colors ${
+              className={`flex-1 flex flex-col items-center py-2 pt-3 transition-all relative ${
                 activeTab === tab.id
-                  ? 'text-violet-600'
+                  ? 'text-violet-600 nav-item-active'
                   : 'text-gray-400'
               }`}
             >
               {tab.icon}
-              <span className="text-[10px] mt-0.5 font-medium">{tab.label}</span>
+              <span className="text-[10px] mt-0.5 font-bold">{tab.label}</span>
             </button>
           ))}
         </div>

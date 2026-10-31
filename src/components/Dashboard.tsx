@@ -9,50 +9,65 @@ interface DashboardProps {
   onUpdateWater: (delta: number) => void;
 }
 
-function CircularProgress({ value, max, label, unit, color, size = 120 }: {
-  value: number; max: number; label: string; unit: string; color: string; size?: number;
+function CircularProgress({ value, max, size = 130 }: {
+  value: number; max: number; size?: number;
 }) {
   const percentage = Math.min((value / max) * 100, 100);
-  const radius = (size - 12) / 2;
+  const radius = (size - 14) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (percentage / 100) * circumference;
+  const isOver = value > max;
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="relative" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#e5e7eb" strokeWidth="8" />
+        <defs>
+          <linearGradient id="progressGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor={isOver ? '#ef4444' : '#8b5cf6'} />
+            <stop offset="100%" stopColor={isOver ? '#f87171' : '#c084fc'} />
+          </linearGradient>
+        </defs>
+        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#f3f0ff" strokeWidth="10" />
         <circle
           cx={size / 2} cy={size / 2} r={radius} fill="none"
-          stroke={color} strokeWidth="8" strokeLinecap="round"
+          stroke="url(#progressGrad)" strokeWidth="10" strokeLinecap="round"
           strokeDasharray={circumference} strokeDashoffset={offset}
-          className="transition-all duration-500"
+          className="progress-ring-circle"
         />
       </svg>
-      <div className="absolute flex flex-col items-center justify-center" style={{ width: size, height: size }}>
-        <span className="text-lg font-bold">{Math.round(value)}</span>
-        <span className="text-xs text-gray-500">/ {max} {unit}</span>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-2xl font-black stat-number">{Math.round(value)}</span>
+        <span className="text-[10px] text-gray-400 font-medium">/ {max} kcal</span>
       </div>
-      <span className="text-xs font-medium text-gray-600 mt-1">{label}</span>
     </div>
   );
 }
 
-function MacroBar({ label, value, target, color, unit = 'g' }: {
-  label: string; value: number; target: number; color: string; unit?: string;
+function MacroBar({ label, value, target, color, icon }: {
+  label: string; value: number; target: number; color: string; icon: string;
 }) {
   const percentage = Math.min((value / target) * 100, 100);
   return (
     <div className="flex items-center gap-3">
-      <span className="text-sm font-medium text-gray-600 w-16">{label}</span>
-      <div className="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden">
-        <div
-          className="h-full rounded-full transition-all duration-500"
-          style={{ width: `${percentage}%`, backgroundColor: color }}
-        />
+      <span className="text-lg w-7 text-center">{icon}</span>
+      <div className="flex-1">
+        <div className="flex justify-between mb-1">
+          <span className="text-xs font-semibold text-gray-600">{label}</span>
+          <span className="text-xs font-bold stat-number" style={{ color }}>
+            {Math.round(value)}<span className="text-gray-400 font-normal">/{target}g</span>
+          </span>
+        </div>
+        <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+          <div
+            className="h-full rounded-full transition-all duration-700 ease-out"
+            style={{
+              width: `${percentage}%`,
+              background: `linear-gradient(90deg, ${color}, ${color}dd)`,
+              boxShadow: percentage > 10 ? `0 0 8px ${color}40` : 'none',
+            }}
+          />
+        </div>
       </div>
-      <span className="text-sm font-semibold w-20 text-right">
-        {Math.round(value)}/{target}{unit}
-      </span>
     </div>
   );
 }
@@ -69,152 +84,215 @@ export default function Dashboard({ dailyLog, profile, onUpdateWater }: Dashboar
   const today = new Date();
   const dayName = today.toLocaleDateString('en-US', { weekday: 'long' });
   const dateStr = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const greeting = today.getHours() < 12 ? 'Good morning' : today.getHours() < 17 ? 'Good afternoon' : 'Good evening';
+
+  const waterGlasses = Math.floor(dailyLog.water / 250);
+  const maxGlasses = Math.ceil(profile.targetWater / 250);
 
   return (
     <div className="space-y-4 pb-24">
-      {/* Header */}
-      <div className="bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl p-5 text-white">
-        <p className="text-sm opacity-80">{dayName}, {dateStr}</p>
-        <h1 className="text-2xl font-bold mt-1">Hey {profile.name}! 💪</h1>
-        <p className="text-sm opacity-90 mt-1">
+      {/* Hero Header */}
+      <div className="hero-gradient hero-shimmer rounded-3xl p-6 text-white shadow-lg shadow-violet-200">
+        <p className="text-xs font-medium opacity-70 tracking-wide uppercase">{dayName} · {dateStr}</p>
+        <h1 className="text-2xl font-black mt-1">{greeting}, {profile.name}! ✨</h1>
+        <p className="text-sm opacity-85 mt-1.5 leading-relaxed">
           {dailyLog.foods.length === 0
-            ? "Let's start logging your meals today!"
+            ? "Ready to start your healthy day? Log your first meal!"
             : calorieStatus.message}
         </p>
       </div>
 
-      {/* Calorie Ring */}
-      <div className="bg-white rounded-2xl p-5 shadow-sm">
-        <h2 className="text-sm font-semibold text-gray-500 mb-3">TODAY'S CALORIES</h2>
+      {/* Calorie Ring Card */}
+      <div className="card p-6 animate-fade-in">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xs font-bold text-gray-400 tracking-widest uppercase">Today's Calories</h2>
+          <span className="text-[10px] bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full font-semibold">
+            {Math.round((totals.calories / profile.targetCalories) * 100)}%
+          </span>
+        </div>
         <div className="flex items-center justify-around">
           <div className="text-center">
-            <p className="text-3xl font-bold text-violet-600">{Math.round(totals.calories)}</p>
-            <p className="text-xs text-gray-500">Eaten</p>
+            <div className="w-12 h-12 rounded-2xl bg-violet-50 flex items-center justify-center mx-auto mb-2">
+              <Flame className="text-violet-500" size={22} />
+            </div>
+            <p className="text-2xl font-black text-violet-600 stat-number">{Math.round(totals.calories)}</p>
+            <p className="text-[10px] text-gray-400 font-medium">Eaten</p>
           </div>
-          <div className="relative">
-            <CircularProgress
-              value={totals.calories}
-              max={profile.targetCalories}
-              label=""
-              unit="kcal"
-              color={totals.calories > profile.targetCalories ? '#ef4444' : '#8b5cf6'}
-            />
-          </div>
+          <CircularProgress value={totals.calories} max={profile.targetCalories} />
           <div className="text-center">
-            <p className="text-3xl font-bold text-emerald-500">{exerciseCals}</p>
-            <p className="text-xs text-gray-500">Burned</p>
+            <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center mx-auto mb-2">
+              <TrendingDown className="text-emerald-500" size={22} />
+            </div>
+            <p className="text-2xl font-black text-emerald-500 stat-number">{exerciseCals}</p>
+            <p className="text-[10px] text-gray-400 font-medium">Burned</p>
           </div>
         </div>
-        <div className="mt-3 text-center">
-          <p className="text-sm text-gray-500">
-            Net: <span className="font-bold text-gray-700">{Math.round(netCalories)} kcal</span>
-            {' '}| Remaining: <span className="font-bold text-violet-600">{Math.max(0, Math.round(profile.targetCalories - totals.calories))} kcal</span>
-          </p>
+        <div className="mt-4 flex justify-center gap-6 text-center">
+          <div>
+            <p className="text-xs text-gray-400">Net</p>
+            <p className="text-sm font-bold text-gray-700 stat-number">{Math.round(netCalories)}</p>
+          </div>
+          <div className="w-px bg-gray-200" />
+          <div>
+            <p className="text-xs text-gray-400">Remaining</p>
+            <p className="text-sm font-bold text-violet-600 stat-number">{Math.max(0, Math.round(profile.targetCalories - totals.calories))}</p>
+          </div>
         </div>
       </div>
 
       {/* Macros */}
-      <div className="bg-white rounded-2xl p-5 shadow-sm space-y-3">
-        <h2 className="text-sm font-semibold text-gray-500">MACROS</h2>
-        <MacroBar label="Protein" value={totals.protein} target={profile.targetProtein} color="#8b5cf6" />
-        <MacroBar label="Carbs" value={totals.carbs} target={profile.targetCarbs} color="#f59e0b" />
-        <MacroBar label="Fat" value={totals.fat} target={profile.targetFat} color="#ef4444" />
-        <MacroBar label="Fiber" value={totals.fiber} target={profile.targetFiber} color="#10b981" />
-        <div className="flex gap-2 pt-2 justify-center">
-          <span className="text-xs bg-violet-50 text-violet-700 px-2 py-1 rounded-full">P {macroPercent.protein}%</span>
-          <span className="text-xs bg-amber-50 text-amber-700 px-2 py-1 rounded-full">C {macroPercent.carbs}%</span>
-          <span className="text-xs bg-red-50 text-red-700 px-2 py-1 rounded-full">F {macroPercent.fat}%</span>
+      <div className="card p-5 space-y-4 animate-fade-in-delay">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xs font-bold text-gray-400 tracking-widest uppercase">Macros</h2>
+          <div className="flex gap-1.5">
+            <span className="text-[10px] bg-violet-50 text-violet-600 px-2 py-0.5 rounded-full font-bold">P {macroPercent.protein}%</span>
+            <span className="text-[10px] bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full font-bold">C {macroPercent.carbs}%</span>
+            <span className="text-[10px] bg-rose-50 text-rose-600 px-2 py-0.5 rounded-full font-bold">F {macroPercent.fat}%</span>
+          </div>
         </div>
+        <MacroBar label="Protein" value={totals.protein} target={profile.targetProtein} color="#8b5cf6" icon="🥩" />
+        <MacroBar label="Carbs" value={totals.carbs} target={profile.targetCarbs} color="#f59e0b" icon="🌾" />
+        <MacroBar label="Fat" value={totals.fat} target={profile.targetFat} color="#f43f5e" icon="🥑" />
+        <MacroBar label="Fiber" value={totals.fiber} target={profile.targetFiber} color="#10b981" icon="🥬" />
       </div>
 
       {/* Water Tracker */}
-      <div className="bg-white rounded-2xl p-5 shadow-sm">
-        <h2 className="text-sm font-semibold text-gray-500 mb-3">WATER INTAKE</h2>
-        <div className="flex items-center justify-between">
+      <div className="card p-5 animate-fade-in">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-xs font-bold text-gray-400 tracking-widest uppercase">Water Intake</h2>
+          <span className="text-xs font-bold text-blue-500 stat-number">
+            {dailyLog.water} / {profile.targetWater} ml
+          </span>
+        </div>
+        <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <Droplets className="text-blue-500" size={24} />
+            <Droplets className="text-blue-400" size={26} />
             <div>
-              <p className="text-2xl font-bold text-blue-600">{dailyLog.water} ml</p>
-              <p className="text-xs text-gray-500">Target: {profile.targetWater} ml</p>
+              <p className="text-3xl font-black text-blue-500 stat-number">{waterGlasses}</p>
+              <p className="text-[10px] text-gray-400">glasses</p>
             </div>
           </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => onUpdateWater(-250)}
-              className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center active:bg-gray-200"
-            >
-              <Minus size={18} />
-            </button>
+          <div className="flex-1">
+            <div className="flex flex-wrap gap-1">
+              {Array.from({ length: maxGlasses }, (_, i) => (
+                <div
+                  key={i}
+                  className={`w-5 h-7 rounded-md transition-all duration-300 ${
+                    i < waterGlasses
+                      ? 'bg-gradient-to-t from-blue-500 to-blue-300 shadow-sm shadow-blue-200'
+                      : 'bg-blue-50 border border-blue-100'
+                  }`}
+                  style={{ animationDelay: `${i * 50}ms` }}
+                />
+              ))}
+            </div>
+          </div>
+          <div className="flex flex-col gap-1.5">
             <button
               onClick={() => onUpdateWater(250)}
-              className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center active:bg-blue-600"
+              className="w-9 h-9 rounded-xl bg-blue-500 text-white flex items-center justify-center active:scale-95 transition-transform shadow-md shadow-blue-200"
             >
               <Plus size={18} />
             </button>
+            <button
+              onClick={() => onUpdateWater(-250)}
+              className="w-9 h-9 rounded-xl bg-gray-100 text-gray-500 flex items-center justify-center active:scale-95 transition-transform"
+            >
+              <Minus size={16} />
+            </button>
           </div>
         </div>
-        <div className="mt-3 h-3 bg-blue-100 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-blue-500 rounded-full transition-all duration-300"
-            style={{ width: `${Math.min((dailyLog.water / profile.targetWater) * 100, 100)}%` }}
-          />
-        </div>
-        <p className="text-xs text-gray-400 mt-1 text-center">
-          {Math.round((dailyLog.water / profile.targetWater) * 100)}% — each tap adds 250ml (1 glass)
-        </p>
       </div>
 
-      {/* Quick Stats */}
+      {/* Quick Stats Grid */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="bg-white rounded-2xl p-4 shadow-sm text-center">
-          <Flame className="text-orange-500 mx-auto mb-1" size={22} />
-          <p className="text-xs text-gray-500">Meals Today</p>
-          <p className="text-xl font-bold">{dailyLog.foods.length}</p>
+        <div className="card p-4 text-center">
+          <div className="w-10 h-10 rounded-2xl bg-orange-50 flex items-center justify-center mx-auto mb-2">
+            <Flame className="text-orange-500" size={20} />
+          </div>
+          <p className="text-2xl font-black stat-number">{dailyLog.foods.length}</p>
+          <p className="text-[10px] text-gray-400 font-medium mt-0.5">Meals Logged</p>
         </div>
-        <div className="bg-white rounded-2xl p-4 shadow-sm text-center">
-          <Beef className="text-violet-500 mx-auto mb-1" size={22} />
-          <p className="text-xs text-gray-500">Exercises</p>
-          <p className="text-xl font-bold">{dailyLog.exercises.length}</p>
+        <div className="card p-4 text-center">
+          <div className="w-10 h-10 rounded-2xl bg-violet-50 flex items-center justify-center mx-auto mb-2">
+            <Beef className="text-violet-500" size={20} />
+          </div>
+          <p className="text-2xl font-black stat-number">{dailyLog.exercises.length}</p>
+          <p className="text-[10px] text-gray-400 font-medium mt-0.5">Exercises Done</p>
         </div>
-        <div className="bg-white rounded-2xl p-4 shadow-sm text-center">
-          <TrendingDown className="text-green-500 mx-auto mb-1" size={22} />
-          <p className="text-xs text-gray-500">Current BMI</p>
-          <p className="text-xl font-bold">{bmi}</p>
-          <p className="text-xs text-gray-400">{bmiCategory}</p>
+        <div className="card p-4 text-center">
+          <div className="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center mx-auto mb-2">
+            <TrendingDown className="text-emerald-500" size={20} />
+          </div>
+          <p className="text-xl font-black stat-number">{bmi}</p>
+          <p className="text-[10px] text-gray-400 font-medium mt-0.5">BMI · {bmiCategory}</p>
         </div>
-        <div className="bg-white rounded-2xl p-4 shadow-sm text-center">
-          <LeafyGreen className="text-emerald-500 mx-auto mb-1" size={22} />
-          <p className="text-xs text-gray-500">Weight Goal</p>
-          <p className="text-xl font-bold">{profile.currentWeightKg}→{profile.targetWeightKg}</p>
-          <p className="text-xs text-gray-400">kg</p>
+        <div className="card p-4 text-center">
+          <div className="w-10 h-10 rounded-2xl bg-pink-50 flex items-center justify-center mx-auto mb-2">
+            <LeafyGreen className="text-pink-500" size={20} />
+          </div>
+          <p className="text-xl font-black stat-number">{profile.currentWeightKg}<span className="text-gray-300 text-sm">→</span>{profile.targetWeightKg}</p>
+          <p className="text-[10px] text-gray-400 font-medium mt-0.5">Weight Goal (kg)</p>
         </div>
       </div>
 
-      {/* Today's Logged Meals Summary */}
+      {/* Today's Meals Summary */}
       {dailyLog.foods.length > 0 && (
-        <div className="bg-white rounded-2xl p-5 shadow-sm">
-          <h2 className="text-sm font-semibold text-gray-500 mb-3">TODAY'S MEALS</h2>
+        <div className="card p-5 animate-fade-in">
+          <h2 className="text-xs font-bold text-gray-400 tracking-widest uppercase mb-4">Today's Meals</h2>
           {(['breakfast', 'lunch', 'snack', 'dinner'] as const).map(mealType => {
             const mealFoods = dailyLog.foods.filter(f => f.mealType === mealType);
             if (mealFoods.length === 0) return null;
             const mealCals = mealFoods.reduce((sum, f) => sum + f.calories, 0);
+            const mealProtein = mealFoods.reduce((sum, f) => sum + f.protein, 0);
             const mealIcons = { breakfast: '🌅', lunch: '☀️', snack: '🍎', dinner: '🌙' };
+            const mealColors = {
+              breakfast: 'from-amber-50 to-orange-50 border-amber-100',
+              lunch: 'from-yellow-50 to-lime-50 border-lime-100',
+              snack: 'from-pink-50 to-rose-50 border-pink-100',
+              dinner: 'from-indigo-50 to-purple-50 border-indigo-100',
+            };
             return (
-              <div key={mealType} className="mb-3 last:mb-0">
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-sm font-medium capitalize">
+              <div key={mealType} className={`mb-3 last:mb-0 p-3 rounded-2xl bg-gradient-to-r border ${mealColors[mealType]}`}>
+                <div className="flex justify-between items-center mb-1.5">
+                  <span className="text-sm font-bold capitalize">
                     {mealIcons[mealType]} {mealType}
                   </span>
-                  <span className="text-sm font-semibold text-gray-700">{Math.round(mealCals)} kcal</span>
+                  <div className="text-right">
+                    <span className="text-sm font-black text-gray-700">{Math.round(mealCals)}</span>
+                    <span className="text-[10px] text-gray-400 ml-0.5">kcal</span>
+                    <span className="text-[10px] text-violet-500 ml-2">{Math.round(mealProtein)}g P</span>
+                  </div>
                 </div>
                 {mealFoods.map(food => (
-                  <p key={food.id} className="text-xs text-gray-500 ml-6">
-                    {food.name} ({food.quantity} {food.servingUnit}) — {Math.round(food.calories)} kcal
+                  <p key={food.id} className="text-xs text-gray-500 ml-6 leading-relaxed">
+                    {food.name} · {Math.round(food.calories)} kcal
                   </p>
                 ))}
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Today's Exercises Summary */}
+      {dailyLog.exercises.length > 0 && (
+        <div className="card p-5 animate-fade-in">
+          <h2 className="text-xs font-bold text-gray-400 tracking-widest uppercase mb-4">Today's Exercises</h2>
+          {dailyLog.exercises.map(ex => (
+            <div key={ex.id} className="mb-2 last:mb-0 p-3 rounded-2xl bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-100">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-semibold">🏋️ {ex.name}</span>
+                <div className="text-right">
+                  <span className="text-sm font-black text-orange-600">{ex.caloriesBurned}</span>
+                  <span className="text-[10px] text-gray-400 ml-0.5">kcal burned</span>
+                </div>
+              </div>
+              <p className="text-xs text-gray-500 ml-6">
+                {ex.duration} min{ex.sets ? ` · ${ex.sets} sets` : ''}{ex.reps ? ` × ${ex.reps} reps` : ''}
+              </p>
+            </div>
+          ))}
         </div>
       )}
     </div>

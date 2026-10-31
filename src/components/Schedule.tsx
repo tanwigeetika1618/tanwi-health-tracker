@@ -42,8 +42,8 @@ export default function Schedule() {
 
   return (
     <div className="space-y-4 pb-24">
-      <div className="bg-gradient-to-br from-indigo-500 to-blue-600 rounded-2xl p-5 text-white">
-        <h1 className="text-2xl font-bold">Weekly Schedule 📅</h1>
+      <div className="hero-schedule hero-shimmer rounded-3xl p-6 text-white shadow-lg shadow-indigo-200">
+        <h1 className="text-2xl font-black">Weekly Schedule 📅</h1>
         <p className="text-sm opacity-90 mt-1">Your personalized daily routine</p>
       </div>
 
@@ -53,12 +53,12 @@ export default function Schedule() {
           <button
             key={day}
             onClick={() => setSelectedDay(day)}
-            className={`px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${
+            className={`px-3 py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
               selectedDay === day
-                ? 'bg-indigo-600 text-white shadow-md'
+                ? 'bg-gradient-to-r from-indigo-500 to-violet-500 text-white shadow-lg shadow-indigo-200'
                 : day === today
                   ? 'bg-indigo-100 text-indigo-700 shadow-sm'
-                  : 'bg-white text-gray-600 shadow-sm'
+                  : 'card text-gray-500'
             }`}
           >
             {day.slice(0, 3)}
@@ -77,7 +77,7 @@ export default function Schedule() {
 
       {/* Quick Summary */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="bg-orange-50 rounded-xl p-3">
+        <div className="card bg-orange-50/60 p-3">
           <p className="text-xs text-orange-600 font-medium">Exercise Sessions</p>
           <p className="text-lg font-bold text-orange-700">{exerciseBlocks.length}</p>
           <div className="mt-1 space-y-0.5">
@@ -86,7 +86,7 @@ export default function Schedule() {
             ))}
           </div>
         </div>
-        <div className="bg-emerald-50 rounded-xl p-3">
+        <div className="card bg-emerald-50/60 p-3">
           <p className="text-xs text-emerald-600 font-medium">Meals Planned</p>
           <p className="text-lg font-bold text-emerald-700">{mealBlocks.length}</p>
           <div className="mt-1 space-y-0.5">
@@ -101,7 +101,7 @@ export default function Schedule() {
       </div>
 
       {/* Timeline */}
-      <div className="bg-white rounded-2xl shadow-sm p-4">
+      <div className="card p-4">
         <h2 className="text-sm font-semibold text-gray-500 mb-4">DAILY TIMELINE</h2>
         <div className="space-y-0">
           {schedule.blocks.map((block, i) => (

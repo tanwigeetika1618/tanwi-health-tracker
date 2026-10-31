@@ -14,6 +14,8 @@ interface ParsedExerciseEntry {
   exercise: typeof exerciseDatabase[0];
   duration: number;
   matchedText: string;
+  reps?: number;
+  sets?: number;
 }
 
 const MEAL_KEYWORDS: Record<MealType, string[]> = {
@@ -304,11 +306,11 @@ export function parseExerciseInput(text: string): ParsedExerciseEntry[] {
     'cycling-stationary': ['cycling', 'cycle', 'bike', 'stationary bike'],
   };
 
-  const segments = normalized.split(/[,;\n]+|(?:\band\b)|(?:\bthen\b)|(?:\bplus\b)|(?:\balso\b)/i);
+  const segments = normalized.split(/[,;\n]+|(?:\band\b)|(?:\bthen\b)|(?:\bplus\b)|(?:\balso\b)|(?:\bdid\b)|(?:\bi did\b)/i);
 
   for (const segment of segments) {
     const trimmed = segment.trim();
-    if (!trimmed) continue;
+    if (!trimmed || trimmed.length < 2) continue;
 
     for (const [exId, aliases] of Object.entries(EXERCISE_ALIASES)) {
       if (usedIds.has(exId)) continue;
@@ -316,10 +318,48 @@ export function parseExerciseInput(text: string): ParsedExerciseEntry[] {
       if (matched) {
         const exercise = exerciseDatabase.find(e => e.id === exId);
         if (exercise) {
+          // Check for duration in minutes
           const durMatch = trimmed.match(/(\d+)\s*(?:min|mins|minutes|minute)/i);
-          const duration = durMatch ? parseInt(durMatch[1]) : 15;
+          // Check for reps like "20 squats" or "squats 20"
+          const repsMatchBefore = trimmed.match(/(\d+)\s+(?:reps?\s+)?(?:of\s+)?/i);
+          const repsMatchAfter = trimmed.match(/(?:for\s+)?(\d+)\s*(?:reps?|times|repetitions)/i);
+          // Check for seconds
+          const secMatch = trimmed.match(/(\d+)\s*(?:sec|secs|seconds|second)/i);
+
+          let duration: number;
+          let reps: number | undefined;
+          let sets: number | undefined;
+
+          if (durMatch) {
+            duration = parseInt(durMatch[1]);
+          } else if (secMatch) {
+            duration = Math.ceil(parseInt(secMatch[1]) / 60);
+          } else if (repsMatchAfter) {
+            reps = parseInt(repsMatchAfter[1]);
+            duration = Math.max(2, Math.ceil(reps / 10));
+          } else if (repsMatchBefore && !trimmed.match(/(\d+)\s*(?:min|sec|hour)/i)) {
+            const num = parseInt(repsMatchBefore[1]);
+            if (num <= 200) {
+              reps = num;
+              duration = Math.max(2, Math.ceil(reps / 10));
+            } else {
+              duration = 15;
+            }
+          } else {
+            duration = 10;
+          }
+
+          // Check for sets
+          const setsMatch = trimmed.match(/(\d+)\s*(?:set|sets)/i);
+          if (setsMatch) {
+            sets = parseInt(setsMatch[1]);
+            if (!durMatch && reps) {
+              duration = Math.max(2, Math.ceil((reps * sets) / 8));
+            }
+          }
+
           usedIds.add(exId);
-          results.push({ exercise, duration, matchedText: trimmed });
+          results.push({ exercise, duration, matchedText: trimmed, reps, sets });
         }
       }
     }
@@ -335,6 +375,8 @@ export function parsedToLoggedExercises(parsed: ParsedExerciseEntry[]): LoggedEx
     name: entry.exercise.name,
     duration: entry.duration,
     caloriesBurned: Math.round(entry.exercise.caloriesPerMinute * entry.duration),
+    sets: entry.sets,
+    reps: entry.reps,
     timestamp: new Date().toISOString(),
   }));
 }

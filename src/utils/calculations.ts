@@ -1,7 +1,7 @@
 import type { UserProfile, LoggedFood, LoggedExercise } from '../types';
 
 export const DEFAULT_PROFILE: UserProfile = {
-  name: 'Tanvi',
+  name: 'Tanwi',
   age: 25,
   gender: 'female',
   heightCm: 155,
