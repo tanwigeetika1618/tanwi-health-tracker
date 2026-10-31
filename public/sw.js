@@ -1,7 +1,7 @@
-const CACHE_NAME = 'tanvi-health-tracker-v1';
+const CACHE_NAME = 'tanwi-health-tracker-v1';
 const ASSETS_TO_CACHE = [
-  '/tanvi-health-tracker/',
-  '/tanvi-health-tracker/index.html',
+  '/tanwi-health-tracker/',
+  '/tanwi-health-tracker/index.html',
 ];
 
 self.addEventListener('install', (event) => {

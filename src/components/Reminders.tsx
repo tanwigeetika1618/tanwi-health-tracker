@@ -81,8 +81,8 @@ export default function Reminders({ reminders, onUpdateReminders }: RemindersPro
     if (permission !== 'granted') return;
     try {
       new Notification(`${reminder.emoji} ${reminder.label}`, {
-        icon: '/tanvi-health-tracker/icons/icon-192.svg',
-        badge: '/tanvi-health-tracker/icons/icon-192.svg',
+        icon: '/tanwi-health-tracker/icons/icon-192.svg',
+        badge: '/tanwi-health-tracker/icons/icon-192.svg',
         tag: reminder.id,
       });
     } catch {

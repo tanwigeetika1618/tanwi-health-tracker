@@ -1,7 +1,7 @@
 import type { FoodItem } from '../types';
 
 export const foodDatabase: FoodItem[] = [
-  // ===== SEEDS & NUTS (Tanvi's purchased items) =====
+  // ===== SEEDS & NUTS (Tanwi's purchased items) =====
   {
     id: 'chia-seeds',
     name: 'Chia Seeds (Satu)',

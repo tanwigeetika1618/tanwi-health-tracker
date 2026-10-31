@@ -26,12 +26,12 @@ const emptyDailyLog: DailyLog = {
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
-  const [profile, setProfile] = useLocalStorage<UserProfile>('tanvi-profile', DEFAULT_PROFILE);
-  const [dailyLogs, setDailyLogs] = useLocalStorage<Record<string, DailyLog>>('tanvi-daily-logs', {});
-  const [weightEntries, setWeightEntries] = useLocalStorage<WeightEntry[]>('tanvi-weight-entries', []);
-  const [customFoods, setCustomFoods] = useLocalStorage<FoodItem[]>('tanvi-custom-foods', []);
-  const [sleepEntries, setSleepEntries] = useLocalStorage<SleepEntry[]>('tanvi-sleep-entries', []);
-  const [reminders, setReminders] = useLocalStorage<Reminder[]>('tanvi-reminders', DEFAULT_REMINDERS);
+  const [profile, setProfile] = useLocalStorage<UserProfile>('tanwi-profile', DEFAULT_PROFILE);
+  const [dailyLogs, setDailyLogs] = useLocalStorage<Record<string, DailyLog>>('tanwi-daily-logs', {});
+  const [weightEntries, setWeightEntries] = useLocalStorage<WeightEntry[]>('tanwi-weight-entries', []);
+  const [customFoods, setCustomFoods] = useLocalStorage<FoodItem[]>('tanwi-custom-foods', []);
+  const [sleepEntries, setSleepEntries] = useLocalStorage<SleepEntry[]>('tanwi-sleep-entries', []);
+  const [reminders, setReminders] = useLocalStorage<Reminder[]>('tanwi-reminders', DEFAULT_REMINDERS);
   const [browseMode, setBrowseMode] = useState<'food' | 'exercise'>('food');
 
   const todayKey = getTodayKey();

@@ -2,7 +2,7 @@
   "name": "Tanwi Health Tracker",
   "short_name": "Health",
   "description": "Tanwi's personal health, nutrition & fitness tracker",
-  "start_url": "/tanvi-health-tracker/",
+  "start_url": "/tanwi-health-tracker/",
   "display": "standalone",
   "background_color": "#0f0d1a",
   "theme_color": "#7c3aed",
