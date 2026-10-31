@@ -27,7 +27,7 @@ function CircularProgress({ value, max, size = 130 }: {
             <stop offset="100%" stopColor={isOver ? '#f87171' : '#c084fc'} />
           </linearGradient>
         </defs>
-        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#f3f0ff" strokeWidth="10" />
+        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="rgba(139,92,246,0.15)" strokeWidth="10" />
         <circle
           cx={size / 2} cy={size / 2} r={radius} fill="none"
           stroke="url(#progressGrad)" strokeWidth="10" strokeLinecap="round"
@@ -36,8 +36,8 @@ function CircularProgress({ value, max, size = 130 }: {
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-2xl font-black stat-number">{Math.round(value)}</span>
-        <span className="text-[10px] text-gray-400 font-medium">/ {max} kcal</span>
+        <span className="text-2xl font-black stat-number text-white">{Math.round(value)}</span>
+        <span className="text-[10px] text-gray-500 font-medium">/ {max} kcal</span>
       </div>
     </div>
   );
@@ -52,18 +52,18 @@ function MacroBar({ label, value, target, color, icon }: {
       <span className="text-lg w-7 text-center">{icon}</span>
       <div className="flex-1">
         <div className="flex justify-between mb-1">
-          <span className="text-xs font-semibold text-gray-600">{label}</span>
+          <span className="text-xs font-semibold text-gray-400">{label}</span>
           <span className="text-xs font-bold stat-number" style={{ color }}>
-            {Math.round(value)}<span className="text-gray-400 font-normal">/{target}g</span>
+            {Math.round(value)}<span className="text-gray-600 font-normal">/{target}g</span>
           </span>
         </div>
-        <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
+        <div className="h-2.5 bg-white/5 rounded-full overflow-hidden">
           <div
             className="h-full rounded-full transition-all duration-700 ease-out"
             style={{
               width: `${percentage}%`,
-              background: `linear-gradient(90deg, ${color}, ${color}dd)`,
-              boxShadow: percentage > 10 ? `0 0 8px ${color}40` : 'none',
+              background: `linear-gradient(90deg, ${color}, ${color}cc)`,
+              boxShadow: percentage > 10 ? `0 0 12px ${color}50` : 'none',
             }}
           />
         </div>
@@ -91,60 +91,64 @@ export default function Dashboard({ dailyLog, profile, onUpdateWater }: Dashboar
 
   return (
     <div className="space-y-4 pb-24">
-      {/* Hero Header */}
-      <div className="hero-gradient hero-shimmer rounded-3xl p-6 text-white shadow-lg shadow-violet-200">
-        <p className="text-xs font-medium opacity-70 tracking-wide uppercase">{dayName} · {dateStr}</p>
-        <div className="flex items-center gap-4 mt-2">
-          <img
-            src={import.meta.env.BASE_URL + 'tanwi-avatar.jpg'}
-            alt="Tanwi"
-            className="w-14 h-14 rounded-2xl object-cover border-2 border-white/40 shadow-lg"
-          />
-          <div>
-            <h1 className="text-2xl font-black">{greeting}, {profile.name}! ✨</h1>
-            <p className="text-sm opacity-85 mt-0.5 leading-relaxed">
-              {dailyLog.foods.length === 0
-                ? "Ready to start your healthy day? Log your first meal!"
-                : calorieStatus.message}
-            </p>
-          </div>
+      {/* Full-Page Profile Hero */}
+      <div className="relative rounded-3xl overflow-hidden shadow-2xl shadow-violet-900/30" style={{ minHeight: '280px' }}>
+        {/* Avatar Background */}
+        <img
+          src={import.meta.env.BASE_URL + 'tanwi-avatar.jpg'}
+          alt="Tanwi"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        {/* Dark Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0f0d1a] via-[#0f0d1a]/70 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-violet-900/30 to-purple-900/20" />
+
+        {/* Content on top */}
+        <div className="relative z-10 p-6 pt-40">
+          <p className="text-xs font-medium text-violet-300/80 tracking-wide uppercase">{dayName} · {dateStr}</p>
+          <h1 className="text-2xl font-black text-white mt-1">{greeting}, {profile.name}! ✨</h1>
+          <p className="text-sm text-violet-200/80 mt-1 leading-relaxed">
+            {dailyLog.foods.length === 0
+              ? "Ready to crush your goals today? Let's go!"
+              : calorieStatus.message}
+          </p>
         </div>
       </div>
 
       {/* Calorie Ring Card */}
       <div className="card p-6 animate-fade-in">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xs font-bold text-gray-400 tracking-widest uppercase">Today's Calories</h2>
-          <span className="text-[10px] bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full font-semibold">
+          <h2 className="text-xs font-bold text-gray-500 tracking-widest uppercase">Today's Calories</h2>
+          <span className="text-[10px] bg-violet-500/20 text-violet-400 px-2 py-0.5 rounded-full font-semibold">
             {Math.round((totals.calories / profile.targetCalories) * 100)}%
           </span>
         </div>
         <div className="flex items-center justify-around">
           <div className="text-center">
-            <div className="w-12 h-12 rounded-2xl bg-violet-50 flex items-center justify-center mx-auto mb-2">
-              <Flame className="text-violet-500" size={22} />
+            <div className="w-12 h-12 rounded-2xl bg-violet-500/10 flex items-center justify-center mx-auto mb-2">
+              <Flame className="text-violet-400" size={22} />
             </div>
-            <p className="text-2xl font-black text-violet-600 stat-number">{Math.round(totals.calories)}</p>
-            <p className="text-[10px] text-gray-400 font-medium">Eaten</p>
+            <p className="text-2xl font-black text-violet-400 stat-number">{Math.round(totals.calories)}</p>
+            <p className="text-[10px] text-gray-500 font-medium">Eaten</p>
           </div>
           <CircularProgress value={totals.calories} max={profile.targetCalories} />
           <div className="text-center">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center mx-auto mb-2">
-              <TrendingDown className="text-emerald-500" size={22} />
+            <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-2">
+              <TrendingDown className="text-emerald-400" size={22} />
             </div>
-            <p className="text-2xl font-black text-emerald-500 stat-number">{exerciseCals}</p>
-            <p className="text-[10px] text-gray-400 font-medium">Burned</p>
+            <p className="text-2xl font-black text-emerald-400 stat-number">{exerciseCals}</p>
+            <p className="text-[10px] text-gray-500 font-medium">Burned</p>
           </div>
         </div>
         <div className="mt-4 flex justify-center gap-6 text-center">
           <div>
-            <p className="text-xs text-gray-400">Net</p>
-            <p className="text-sm font-bold text-gray-700 stat-number">{Math.round(netCalories)}</p>
+            <p className="text-xs text-gray-500">Net</p>
+            <p className="text-sm font-bold text-gray-300 stat-number">{Math.round(netCalories)}</p>
           </div>
-          <div className="w-px bg-gray-200" />
+          <div className="w-px bg-white/10" />
           <div>
-            <p className="text-xs text-gray-400">Remaining</p>
-            <p className="text-sm font-bold text-violet-600 stat-number">{Math.max(0, Math.round(profile.targetCalories - totals.calories))}</p>
+            <p className="text-xs text-gray-500">Remaining</p>
+            <p className="text-sm font-bold text-violet-400 stat-number">{Math.max(0, Math.round(profile.targetCalories - totals.calories))}</p>
           </div>
         </div>
       </div>
@@ -152,24 +156,24 @@ export default function Dashboard({ dailyLog, profile, onUpdateWater }: Dashboar
       {/* Macros */}
       <div className="card p-5 space-y-4 animate-fade-in-delay">
         <div className="flex items-center justify-between">
-          <h2 className="text-xs font-bold text-gray-400 tracking-widest uppercase">Macros</h2>
+          <h2 className="text-xs font-bold text-gray-500 tracking-widest uppercase">Macros</h2>
           <div className="flex gap-1.5">
-            <span className="text-[10px] bg-violet-50 text-violet-600 px-2 py-0.5 rounded-full font-bold">P {macroPercent.protein}%</span>
-            <span className="text-[10px] bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full font-bold">C {macroPercent.carbs}%</span>
-            <span className="text-[10px] bg-rose-50 text-rose-600 px-2 py-0.5 rounded-full font-bold">F {macroPercent.fat}%</span>
+            <span className="text-[10px] bg-violet-500/15 text-violet-400 px-2 py-0.5 rounded-full font-bold">P {macroPercent.protein}%</span>
+            <span className="text-[10px] bg-amber-500/15 text-amber-400 px-2 py-0.5 rounded-full font-bold">C {macroPercent.carbs}%</span>
+            <span className="text-[10px] bg-rose-500/15 text-rose-400 px-2 py-0.5 rounded-full font-bold">F {macroPercent.fat}%</span>
           </div>
         </div>
-        <MacroBar label="Protein" value={totals.protein} target={profile.targetProtein} color="#8b5cf6" icon="🥩" />
-        <MacroBar label="Carbs" value={totals.carbs} target={profile.targetCarbs} color="#f59e0b" icon="🌾" />
-        <MacroBar label="Fat" value={totals.fat} target={profile.targetFat} color="#f43f5e" icon="🥑" />
-        <MacroBar label="Fiber" value={totals.fiber} target={profile.targetFiber} color="#10b981" icon="🥬" />
+        <MacroBar label="Protein" value={totals.protein} target={profile.targetProtein} color="#a78bfa" icon="🥩" />
+        <MacroBar label="Carbs" value={totals.carbs} target={profile.targetCarbs} color="#fbbf24" icon="🌾" />
+        <MacroBar label="Fat" value={totals.fat} target={profile.targetFat} color="#fb7185" icon="🥑" />
+        <MacroBar label="Fiber" value={totals.fiber} target={profile.targetFiber} color="#34d399" icon="🥬" />
       </div>
 
       {/* Water Tracker */}
       <div className="card p-5 animate-fade-in">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-xs font-bold text-gray-400 tracking-widest uppercase">Water Intake</h2>
-          <span className="text-xs font-bold text-blue-500 stat-number">
+          <h2 className="text-xs font-bold text-gray-500 tracking-widest uppercase">Water Intake</h2>
+          <span className="text-xs font-bold text-blue-400 stat-number">
             {dailyLog.water} / {profile.targetWater} ml
           </span>
         </div>
@@ -177,8 +181,8 @@ export default function Dashboard({ dailyLog, profile, onUpdateWater }: Dashboar
           <div className="flex items-center gap-2">
             <Droplets className="text-blue-400" size={26} />
             <div>
-              <p className="text-3xl font-black text-blue-500 stat-number">{waterGlasses}</p>
-              <p className="text-[10px] text-gray-400">glasses</p>
+              <p className="text-3xl font-black text-blue-400 stat-number">{waterGlasses}</p>
+              <p className="text-[10px] text-gray-500">glasses</p>
             </div>
           </div>
           <div className="flex-1">
@@ -188,10 +192,9 @@ export default function Dashboard({ dailyLog, profile, onUpdateWater }: Dashboar
                   key={i}
                   className={`w-5 h-7 rounded-md transition-all duration-300 ${
                     i < waterGlasses
-                      ? 'bg-gradient-to-t from-blue-500 to-blue-300 shadow-sm shadow-blue-200'
-                      : 'bg-blue-50 border border-blue-100'
+                      ? 'bg-gradient-to-t from-blue-600 to-blue-400 shadow-sm shadow-blue-500/30'
+                      : 'bg-white/5 border border-white/10'
                   }`}
-                  style={{ animationDelay: `${i * 50}ms` }}
                 />
               ))}
             </div>
@@ -199,13 +202,13 @@ export default function Dashboard({ dailyLog, profile, onUpdateWater }: Dashboar
           <div className="flex flex-col gap-1.5">
             <button
               onClick={() => onUpdateWater(250)}
-              className="w-9 h-9 rounded-xl bg-blue-500 text-white flex items-center justify-center active:scale-95 transition-transform shadow-md shadow-blue-200"
+              className="w-9 h-9 rounded-xl bg-blue-500 text-white flex items-center justify-center active:scale-95 transition-transform shadow-lg shadow-blue-500/30"
             >
               <Plus size={18} />
             </button>
             <button
               onClick={() => onUpdateWater(-250)}
-              className="w-9 h-9 rounded-xl bg-gray-100 text-gray-500 flex items-center justify-center active:scale-95 transition-transform"
+              className="w-9 h-9 rounded-xl bg-white/10 text-gray-400 flex items-center justify-center active:scale-95 transition-transform"
             >
               <Minus size={16} />
             </button>
@@ -216,39 +219,39 @@ export default function Dashboard({ dailyLog, profile, onUpdateWater }: Dashboar
       {/* Quick Stats Grid */}
       <div className="grid grid-cols-2 gap-3">
         <div className="card p-4 text-center">
-          <div className="w-10 h-10 rounded-2xl bg-orange-50 flex items-center justify-center mx-auto mb-2">
-            <Flame className="text-orange-500" size={20} />
+          <div className="w-10 h-10 rounded-2xl bg-orange-500/10 flex items-center justify-center mx-auto mb-2">
+            <Flame className="text-orange-400" size={20} />
           </div>
-          <p className="text-2xl font-black stat-number">{dailyLog.foods.length}</p>
-          <p className="text-[10px] text-gray-400 font-medium mt-0.5">Meals Logged</p>
+          <p className="text-2xl font-black text-white stat-number">{dailyLog.foods.length}</p>
+          <p className="text-[10px] text-gray-500 font-medium mt-0.5">Meals Logged</p>
         </div>
         <div className="card p-4 text-center">
-          <div className="w-10 h-10 rounded-2xl bg-violet-50 flex items-center justify-center mx-auto mb-2">
-            <Beef className="text-violet-500" size={20} />
+          <div className="w-10 h-10 rounded-2xl bg-violet-500/10 flex items-center justify-center mx-auto mb-2">
+            <Beef className="text-violet-400" size={20} />
           </div>
-          <p className="text-2xl font-black stat-number">{dailyLog.exercises.length}</p>
-          <p className="text-[10px] text-gray-400 font-medium mt-0.5">Exercises Done</p>
+          <p className="text-2xl font-black text-white stat-number">{dailyLog.exercises.length}</p>
+          <p className="text-[10px] text-gray-500 font-medium mt-0.5">Exercises Done</p>
         </div>
         <div className="card p-4 text-center">
-          <div className="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center mx-auto mb-2">
-            <TrendingDown className="text-emerald-500" size={20} />
+          <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-2">
+            <TrendingDown className="text-emerald-400" size={20} />
           </div>
-          <p className="text-xl font-black stat-number">{bmi}</p>
-          <p className="text-[10px] text-gray-400 font-medium mt-0.5">BMI · {bmiCategory}</p>
+          <p className="text-xl font-black text-white stat-number">{bmi}</p>
+          <p className="text-[10px] text-gray-500 font-medium mt-0.5">BMI · {bmiCategory}</p>
         </div>
         <div className="card p-4 text-center">
-          <div className="w-10 h-10 rounded-2xl bg-pink-50 flex items-center justify-center mx-auto mb-2">
-            <LeafyGreen className="text-pink-500" size={20} />
+          <div className="w-10 h-10 rounded-2xl bg-pink-500/10 flex items-center justify-center mx-auto mb-2">
+            <LeafyGreen className="text-pink-400" size={20} />
           </div>
-          <p className="text-xl font-black stat-number">{profile.currentWeightKg}<span className="text-gray-300 text-sm">→</span>{profile.targetWeightKg}</p>
-          <p className="text-[10px] text-gray-400 font-medium mt-0.5">Weight Goal (kg)</p>
+          <p className="text-xl font-black text-white stat-number">{profile.currentWeightKg}<span className="text-gray-600 text-sm">→</span>{profile.targetWeightKg}</p>
+          <p className="text-[10px] text-gray-500 font-medium mt-0.5">Weight Goal (kg)</p>
         </div>
       </div>
 
       {/* Today's Meals Summary */}
       {dailyLog.foods.length > 0 && (
         <div className="card p-5 animate-fade-in">
-          <h2 className="text-xs font-bold text-gray-400 tracking-widest uppercase mb-4">Today's Meals</h2>
+          <h2 className="text-xs font-bold text-gray-500 tracking-widest uppercase mb-4">Today's Meals</h2>
           {(['breakfast', 'lunch', 'snack', 'dinner'] as const).map(mealType => {
             const mealFoods = dailyLog.foods.filter(f => f.mealType === mealType);
             if (mealFoods.length === 0) return null;
@@ -256,21 +259,21 @@ export default function Dashboard({ dailyLog, profile, onUpdateWater }: Dashboar
             const mealProtein = mealFoods.reduce((sum, f) => sum + f.protein, 0);
             const mealIcons = { breakfast: '🌅', lunch: '☀️', snack: '🍎', dinner: '🌙' };
             const mealColors = {
-              breakfast: 'from-amber-50 to-orange-50 border-amber-100',
-              lunch: 'from-yellow-50 to-lime-50 border-lime-100',
-              snack: 'from-pink-50 to-rose-50 border-pink-100',
-              dinner: 'from-indigo-50 to-purple-50 border-indigo-100',
+              breakfast: 'from-amber-500/10 to-orange-500/10 border-amber-500/20',
+              lunch: 'from-yellow-500/10 to-lime-500/10 border-lime-500/20',
+              snack: 'from-pink-500/10 to-rose-500/10 border-pink-500/20',
+              dinner: 'from-indigo-500/10 to-purple-500/10 border-indigo-500/20',
             };
             return (
               <div key={mealType} className={`mb-3 last:mb-0 p-3 rounded-2xl bg-gradient-to-r border ${mealColors[mealType]}`}>
                 <div className="flex justify-between items-center mb-1.5">
-                  <span className="text-sm font-bold capitalize">
+                  <span className="text-sm font-bold capitalize text-gray-200">
                     {mealIcons[mealType]} {mealType}
                   </span>
                   <div className="text-right">
-                    <span className="text-sm font-black text-gray-700">{Math.round(mealCals)}</span>
-                    <span className="text-[10px] text-gray-400 ml-0.5">kcal</span>
-                    <span className="text-[10px] text-violet-500 ml-2">{Math.round(mealProtein)}g P</span>
+                    <span className="text-sm font-black text-gray-200">{Math.round(mealCals)}</span>
+                    <span className="text-[10px] text-gray-500 ml-0.5">kcal</span>
+                    <span className="text-[10px] text-violet-400 ml-2">{Math.round(mealProtein)}g P</span>
                   </div>
                 </div>
                 {mealFoods.map(food => (
@@ -284,17 +287,17 @@ export default function Dashboard({ dailyLog, profile, onUpdateWater }: Dashboar
         </div>
       )}
 
-      {/* Today's Exercises Summary */}
+      {/* Today's Exercises */}
       {dailyLog.exercises.length > 0 && (
         <div className="card p-5 animate-fade-in">
-          <h2 className="text-xs font-bold text-gray-400 tracking-widest uppercase mb-4">Today's Exercises</h2>
+          <h2 className="text-xs font-bold text-gray-500 tracking-widest uppercase mb-4">Today's Exercises</h2>
           {dailyLog.exercises.map(ex => (
-            <div key={ex.id} className="mb-2 last:mb-0 p-3 rounded-2xl bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-100">
+            <div key={ex.id} className="mb-2 last:mb-0 p-3 rounded-2xl bg-gradient-to-r from-orange-500/10 to-amber-500/10 border border-orange-500/20">
               <div className="flex justify-between items-center">
-                <span className="text-sm font-semibold">🏋️ {ex.name}</span>
+                <span className="text-sm font-semibold text-gray-200">🏋️ {ex.name}</span>
                 <div className="text-right">
-                  <span className="text-sm font-black text-orange-600">{ex.caloriesBurned}</span>
-                  <span className="text-[10px] text-gray-400 ml-0.5">kcal burned</span>
+                  <span className="text-sm font-black text-orange-400">{ex.caloriesBurned}</span>
+                  <span className="text-[10px] text-gray-500 ml-0.5">kcal</span>
                 </div>
               </div>
               <p className="text-xs text-gray-500 ml-6">

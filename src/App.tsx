@@ -103,7 +103,7 @@ export default function App() {
   ];
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #f8f0ff 0%, #f0f4ff 50%, #f0fdf4 100%)' }}>
+    <div className="min-h-screen" style={{ background: '#0f0d1a' }}>
       {/* Secondary tabs bar (only shown when a secondary tab is active, or as quick access) */}
       <div className="fixed top-0 left-0 right-0 z-10 bottom-nav">
         <div className="max-w-lg mx-auto flex items-center px-2 py-1.5 gap-1">
@@ -113,8 +113,8 @@ export default function App() {
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
                 activeTab === tab.id
-                  ? 'bg-violet-100 text-violet-700'
-                  : 'text-gray-400 hover:text-gray-600'
+                  ? 'bg-violet-500/20 text-violet-400'
+                  : 'text-gray-600 hover:text-gray-400'
               }`}
             >
               {tab.icon}

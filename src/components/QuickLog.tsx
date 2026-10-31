@@ -214,11 +214,11 @@ export default function QuickLog({ onAddFoods, onAddExercises, customFoods }: Qu
             ? '🎤 "breakfast: 2 eggs, banana, oats with milk and chia seeds. lunch: dal roti sabzi..."'
             : '🎤 "did high knees for 5 mins and 20 squats, 30 min yoga..."'
           }
-          className="w-full p-5 text-sm resize-none focus:outline-none min-h-[110px] bg-transparent placeholder:text-gray-300"
+          className="w-full p-5 text-sm resize-none focus:outline-none min-h-[110px] bg-transparent placeholder:text-gray-600 text-gray-200"
           rows={4}
         />
 
-        <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-gray-50 to-white border-t border-gray-100">
+        <div className="flex items-center justify-between px-4 py-3 bg-white/5 border-t border-white/5">
           <div className="flex gap-2">
             <button
               onClick={isListening ? stopListening : startListening}
